@@ -22,4 +22,13 @@ export class QuestionService {
         question.order = createQuestionDto.order;
         return await this.questionRepository.save(question);
     }
+
+    async getQuestionsByGameID(id: string) {
+        return await this.questionRepository.find({
+            where: {
+                game_id: id
+            }
+        });
+    }
 }
+

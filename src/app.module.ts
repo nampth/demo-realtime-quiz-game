@@ -1,9 +1,9 @@
-import { Module, OnApplicationBootstrap } from '@nestjs/common';
+import { Inject, Module, OnApplicationBootstrap } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { GameModule } from './game/game.module';
 import { QuestionModule } from './question/question.module';
-import { CacheModule } from '@nestjs/cache-manager';
+import { Cache, CACHE_MANAGER, CacheModule } from '@nestjs/cache-manager';
 import { UserModule } from './user/user.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
@@ -19,6 +19,7 @@ import { Question } from './question/entities/question.entity';
 import { QuestionService } from './question/question.service';
 import { EventModule } from './event/event.module';
 import { GatewayModule } from './gateway/gateway.module';
+import { GAME_STATES } from './constants/states';
 
 require("dotenv").config();
 @Module({
@@ -59,11 +60,13 @@ export class AppModule implements OnApplicationBootstrap {
     private readonly gameSeeder: GameSeeder,
     private readonly userSeeder: UserSeeder,
     private readonly questionSeeder: QuestionSeeder,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) { }
 
   async onApplicationBootstrap() {
+    await this.cacheManager.set(GAME_STATES.ROOMS, [])
     if (process.env.RUN_SEEDER == "1") {
-      // await this.userSeeder.seed();
+      await this.userSeeder.seed();
       // await this.gameSeeder.seed();
       // await this.questionSeeder.seed();
     }
