@@ -18,7 +18,6 @@ export class User {
     @Column()
     fullname: string;
 
-
     @Column({ default: USER_STATUSES.ACTIVE })
     status: string;
 

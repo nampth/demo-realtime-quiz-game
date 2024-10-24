@@ -26,8 +26,8 @@ export class CreateQuestionTable1729753027001 implements MigrationInterface {
                 },
                 {
                     name: "answer",
-                    type: "varchar",
-                    length: "100",
+                    type: "int",
+                    length: "10",
                 },
                 {
                     name: "score",
@@ -36,6 +36,11 @@ export class CreateQuestionTable1729753027001 implements MigrationInterface {
                 },
                 {
                     name: "duration",
+                    type: "int",
+                    length: "10",
+                },
+                {
+                    name: "order",
                     type: "int",
                     length: "10",
                 },

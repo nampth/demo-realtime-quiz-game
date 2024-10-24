@@ -9,6 +9,14 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { UserSeeder } from './user/seeders/user.seeder';
+import { GameSeeder } from './game/seeders/game.seeder';
+import { UserService } from './user/user.service';
+import { User } from './user/entities/user.entity';
+import { GameService } from './game/game.service';
+import { Game } from './game/entities/game.entity';
+import { QuestionSeeder } from './question/seeders/question.seeder';
+import { Question } from './question/entities/question.entity';
+import { QuestionService } from './question/question.service';
 
 require("dotenv").config();
 @Module({
@@ -37,16 +45,23 @@ require("dotenv").config();
     },
     ),
     UserModule,
+    TypeOrmModule.forFeature([User, Game, Question]),
   ],
   controllers: [AppController],
-  providers: [AppService, UserSeeder],
+  providers: [AppService, UserSeeder, UserService, GameSeeder, GameService, QuestionSeeder, QuestionService],
 })
 export class AppModule implements OnApplicationBootstrap {
-  constructor(private readonly userSeeder: UserSeeder) { }
+  constructor(
+    private readonly gameSeeder: GameSeeder,
+    private readonly userSeeder: UserSeeder,
+    private readonly questionSeeder: QuestionSeeder,
+  ) { }
 
   async onApplicationBootstrap() {
-    if (process.env.RUN_SEEDER) {
-      await this.userSeeder.seed();
+    if (process.env.RUN_SEEDER == "1") {
+      // await this.userSeeder.seed();
+      // await this.gameSeeder.seed();
+      await this.questionSeeder.seed();
     }
   }
 

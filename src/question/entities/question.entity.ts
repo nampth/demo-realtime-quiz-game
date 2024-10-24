@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm"; 
+import { Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { TABLES } from "src/constants/tables";
 
 @Entity(TABLES.QUESTION)
@@ -13,13 +13,16 @@ export class Question {
     options: string;
 
     @Column()
-    answer: string;
+    answer: number;
 
     @Column()
     score: number;
-    
+
     @Column()
     duration: number;
+
+    @Column()
+    order: number;
 
     @Column()
     game_id: string;

@@ -32,27 +32,18 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
         const cookie_str = request.headers.cookie; // Assuming cookie name is 'jwt'
 
         const access_token = getTokenFromCookie(cookie_str, 'access_token');
-        const refresh_token = getTokenFromCookie(cookie_str, 'refresh_token');
         if (access_token) {
-            try {
-                if (isTokenAboutToExpire(access_token) && this.jwtService.verify(refresh_token, { secret: process.env.JWT_SECRET_REFRESH })) {
+            try { 
+                if (!isTokenAboutToExpire(access_token)) { 
                     const user = this.jwtService.decode(access_token);
                     request.user = user;
                     return true;
-
-                } else if (access_token && this.jwtService.verify(access_token, { secret: process.env.JWT_SECRET })) {
-                    const user = this.jwtService.decode(access_token);
-                    if ((user && user.role_name) || (user && !user.role_name && request.route.path == '/auth')) {
-                        request.user = user;
-                        return true;
-                    } else {
-                        throw new UnauthorizedException(Errors.EXPIRED_INVALID);
-                    }
+                } else {
+                    throw new UnauthorizedException(Errors.EXPIRED_INVALID);
                 }
             } catch (err) {
                 throw new UnauthorizedException(Errors.EXPIRED_INVALID);
             }
-            throw new UnauthorizedException(Errors.EXPIRED_INVALID);
         }
         throw new UnauthorizedException(Errors.NOTFOUND);
     }

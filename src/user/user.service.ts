@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
+import { TABLES } from 'src/constants/tables';
 
 @Injectable()
 export class UserService {
@@ -12,8 +13,8 @@ export class UserService {
 
     async getUserByEmail(email: string): Promise<User | undefined> {
         let user = await this.userRepository
-            .createQueryBuilder('users')
-            .where(`users.email = "${email}"`)
+            .createQueryBuilder(TABLES.USER)
+            .where(`${TABLES.USER}.email = "${email}"`)
             .getOne();
         if (user) {
             return user;

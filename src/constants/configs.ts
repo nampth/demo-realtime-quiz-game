@@ -2,7 +2,7 @@ require("dotenv").config();
 export const ConstantConfigs = {
     PROD_ENV: 'prod',
     SALT_ROUND: 10,
-    JWT_EXPIRE_MINS: 5,
+    JWT_EXPIRE_MINS: 30,
     JWT_REFRESH_EXPIRE_DAYS: 7,
     FACEOTP_DB: process.env.QUERYLOG_DATABASE,
     MAX_RECORDS: 100,
