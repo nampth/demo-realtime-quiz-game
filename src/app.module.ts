@@ -17,6 +17,8 @@ import { Game } from './game/entities/game.entity';
 import { QuestionSeeder } from './question/seeders/question.seeder';
 import { Question } from './question/entities/question.entity';
 import { QuestionService } from './question/question.service';
+import { EventModule } from './event/event.module';
+import { GatewayModule } from './gateway/gateway.module';
 
 require("dotenv").config();
 @Module({
@@ -42,10 +44,12 @@ require("dotenv").config();
     QuestionModule,
     CacheModule.register({
       isGlobal: true,
-    },
-    ),
+      ttl: 60 * 60,
+      max: 1000,
+    }),
     UserModule,
     TypeOrmModule.forFeature([User, Game, Question]),
+    EventModule, GatewayModule,
   ],
   controllers: [AppController],
   providers: [AppService, UserSeeder, UserService, GameSeeder, GameService, QuestionSeeder, QuestionService],
@@ -61,7 +65,7 @@ export class AppModule implements OnApplicationBootstrap {
     if (process.env.RUN_SEEDER == "1") {
       // await this.userSeeder.seed();
       // await this.gameSeeder.seed();
-      await this.questionSeeder.seed();
+      // await this.questionSeeder.seed();
     }
   }
 

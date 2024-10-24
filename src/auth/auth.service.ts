@@ -57,7 +57,7 @@ export class AuthService {
         await this.userRepository.update(user.id, {
             last_login: moment().format('YYYY-MM-DD HH:mm:ss')
         })
-        const payload = { email: user.email };
+        const payload = { email: user.email, id: user.id };
         return {
             access_token: this.jwtService.sign(payload, {
                 expiresIn: `${ConstantConfigs.JWT_EXPIRE_MINS}m`
