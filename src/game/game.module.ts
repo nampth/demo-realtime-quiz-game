@@ -9,12 +9,13 @@ import { JwtService } from '@nestjs/jwt';
 import { EventsGateway } from 'src/event/events.gateway';
 import { QuestionService } from 'src/question/question.service';
 import { Question } from 'src/question/entities/question.entity';
+import { RedisService } from 'src/redis/redis.service';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Game, User, Question]),
   ],
   controllers: [GameController],
-  providers: [GameService, UserService, JwtService, EventsGateway, QuestionService]
+  providers: [GameService, UserService, JwtService, EventsGateway, QuestionService, RedisService]
 })
 export class GameModule { }

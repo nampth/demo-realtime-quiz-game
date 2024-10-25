@@ -3,7 +3,7 @@ import { CreateGameDto } from './dto/CreateGame.dto';
 import { Game } from './entities/game.entity';
 import { GAME_STATUSES } from 'src/constants/statuses/game';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Equal, Repository } from 'typeorm';
+import { Equal, Not, Repository } from 'typeorm';
 import { TABLES } from 'src/constants/tables';
 
 @Injectable()
@@ -48,5 +48,13 @@ export class GameService {
         }
         game.status = GAME_STATUSES.PLAYING;
         return await this.gameRepository.save(game);
+    }
+
+    async resetGame() {
+        await this.gameRepository.update(
+            { status: Not(GAME_STATUSES.PENDING) },
+            { status: GAME_STATUSES.PENDING }
+        );
+
     }
 }

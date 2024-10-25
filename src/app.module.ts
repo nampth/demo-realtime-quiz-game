@@ -1,4 +1,4 @@
-import { Inject, Module, OnApplicationBootstrap } from '@nestjs/common';
+import { Global, Inject, Module, OnApplicationBootstrap } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { GameModule } from './game/game.module';
@@ -17,11 +17,14 @@ import { Game } from './game/entities/game.entity';
 import { QuestionSeeder } from './question/seeders/question.seeder';
 import { Question } from './question/entities/question.entity';
 import { QuestionService } from './question/question.service';
-import { EventModule } from './event/event.module'; 
+import { EventModule } from './event/event.module';
 import { GAME_STATES } from './constants/states';
 import { redisStore } from 'cache-manager-redis-yet';
+import { RedisModule } from './redis/redis.module';
+import Redis from 'ioredis';
 
 require("dotenv").config();
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -43,39 +46,36 @@ require("dotenv").config();
     AuthModule,
     GameModule,
     QuestionModule,
-    CacheModule.registerAsync({
-      useFactory: async () => {
-        const store = await redisStore({
-          socket: {
-            host: 'localhost',
-            port: 6379,
-          },
-        });
 
-        return {
-          store: store as unknown as CacheStore,
-          ttl: 60 * 60000, // 3 minutes (milliseconds)
-        };
-      },
-    }),
 
     UserModule,
     TypeOrmModule.forFeature([User, Game, Question]),
-    EventModule
+    EventModule,
+    RedisModule
   ],
   controllers: [AppController],
-  providers: [AppService, UserSeeder, UserService, GameSeeder, GameService, QuestionSeeder, QuestionService],
+  providers: [AppService, UserSeeder, UserService, GameSeeder, GameService, QuestionSeeder, QuestionService,
+    //   {
+    //     provide: 'REDIS_CLIENT',
+    //     useFactory: () => {
+    //       return new Redis({
+    //         host: 'localhost',
+    //         port: 6379,
+    //       });
+    //     },
+    //   },
+  ],
+  // exports: ['REDIS_CLIENT'],
 })
+
 export class AppModule implements OnApplicationBootstrap {
   constructor(
     private readonly gameSeeder: GameSeeder,
     private readonly userSeeder: UserSeeder,
     private readonly questionSeeder: QuestionSeeder,
-    @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) { }
 
   async onApplicationBootstrap() {
-    await this.cacheManager.set(GAME_STATES.ROOMS, [])
     if (process.env.RUN_SEEDER == "1") {
       await this.userSeeder.seed();
       // await this.gameSeeder.seed();

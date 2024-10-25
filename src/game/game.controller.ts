@@ -1,4 +1,4 @@
-import { Controller, Get, Inject, Param, Put, Req, UseGuards } from '@nestjs/common';
+import { Controller, Delete, Get, Inject, Param, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { GameService } from './game.service';
 import { UserService } from 'src/user/user.service';
@@ -11,8 +11,9 @@ import { API_STATUSES } from 'src/constants/statuses/api';
 import { GAME_STATES } from 'src/constants/states';
 import { GameType } from 'src/common/types/game';
 import { QuestionService } from 'src/question/question.service';
+import { RedisService } from 'src/redis/redis.service';
 
-@UseGuards(JwtAuthGuard)
+// @UseGuards(JwtAuthGuard)
 @ApiTags(TABLES.GAME)
 @Controller('game')
 export class GameController {
@@ -21,32 +22,48 @@ export class GameController {
         private readonly userServices: UserService,
         private readonly gameServices: GameService,
         private readonly eventsGateway: EventsGateway,
-        @Inject(CACHE_MANAGER) private cacheManager: Cache
+        private readonly redisService: RedisService
     ) { }
 
     @Get('/')
     @ApiOperation({ summary: 'Fetch available games' })
-    async getGames(@Req() req: any): Promise<any> {
-        console.log(req.user);
-        return await this.gameServices.getGameByUserID(req.user.id);
+    async getGames(@Req() req: any, @Query('email') email: string): Promise<any> {
+        const user = await this.userServices.getUserByEmail(email);
+        return await this.gameServices.getGameByUserID(user?.id);
+    }
+
+    @Delete('/reset')
+    @ApiOperation({ summary: 'Choose a game' })
+    async resetGame(@Req() req: any,) {
+        await this.redisService.saveData(GAME_STATES.ROOMS, [])
+        await this.gameServices.resetGame();
+        return {
+            status: API_STATUSES.SUCCESS
+        }
     }
 
     @Put('/play/:game_id')
     @ApiOperation({ summary: 'Choose a game' })
-    async playGame(@Req() req: any, @Param('game_id') game_id: string) {
-        const game = await this.gameServices.playGame(game_id, req.user.id);
+    async playGame(@Req() req: any, @Param('game_id') game_id: string, @Query('email') email: string) {
+        const user = await this.userServices.getUserByEmail(email);
+        const game = await this.gameServices.playGame(game_id, user.id);
         let roomId = getRandomNumber(1e6, 1e7);
 
         let questions = await this.questionService.getQuestionsByGameID(game.id);
-        let rooms = await this.cacheManager.get<GameType[]>(GAME_STATES.ROOMS);
+        let rooms = await this.redisService.getData(GAME_STATES.ROOMS);
         let newGame = <GameType>{
             room_id: roomId,
-            questions: questions
+            questions: questions,
+            current_index: -1,
+            answer: [],
+            players: []
         };
-        rooms.push(newGame);
-        await this.cacheManager.set(GAME_STATES.ROOMS, rooms)
-        let test = await this.cacheManager.get<GameType[]>(GAME_STATES.ROOMS);;
-        console.log(test);
+        if (rooms) {
+            rooms.push(newGame);
+        } else {
+            rooms = [newGame];
+        }
+        await this.redisService.saveData(GAME_STATES.ROOMS, rooms)
         return {
             status: API_STATUSES.SUCCESS,
             room: roomId

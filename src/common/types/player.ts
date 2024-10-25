@@ -1,4 +1,5 @@
 export type PlayerType ={
     email: string,
-    score: 0
+    id: string,
+    score: 0,
 }
