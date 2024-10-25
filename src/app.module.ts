@@ -3,7 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { GameModule } from './game/game.module';
 import { QuestionModule } from './question/question.module';
-import { Cache, CACHE_MANAGER, CacheModule } from '@nestjs/cache-manager';
+import { Cache, CACHE_MANAGER, CacheModule, CacheStore } from '@nestjs/cache-manager';
 import { UserModule } from './user/user.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
@@ -17,9 +17,9 @@ import { Game } from './game/entities/game.entity';
 import { QuestionSeeder } from './question/seeders/question.seeder';
 import { Question } from './question/entities/question.entity';
 import { QuestionService } from './question/question.service';
-import { EventModule } from './event/event.module';
-import { GatewayModule } from './gateway/gateway.module';
+import { EventModule } from './event/event.module'; 
 import { GAME_STATES } from './constants/states';
+import { redisStore } from 'cache-manager-redis-yet';
 
 require("dotenv").config();
 @Module({
@@ -43,14 +43,25 @@ require("dotenv").config();
     AuthModule,
     GameModule,
     QuestionModule,
-    CacheModule.register({
-      isGlobal: true,
-      ttl: 60 * 60,
-      max: 1000,
+    CacheModule.registerAsync({
+      useFactory: async () => {
+        const store = await redisStore({
+          socket: {
+            host: 'localhost',
+            port: 6379,
+          },
+        });
+
+        return {
+          store: store as unknown as CacheStore,
+          ttl: 60 * 60000, // 3 minutes (milliseconds)
+        };
+      },
     }),
+
     UserModule,
     TypeOrmModule.forFeature([User, Game, Question]),
-    EventModule, GatewayModule,
+    EventModule
   ],
   controllers: [AppController],
   providers: [AppService, UserSeeder, UserService, GameSeeder, GameService, QuestionSeeder, QuestionService],

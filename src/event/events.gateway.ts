@@ -9,7 +9,7 @@ import { SOCKET_EVENTS } from 'src/constants/events';
 import { GAME_STATES } from 'src/constants/states';
 
 @WebSocketGateway({
-  port: 3033,
+  port: process.env.SERVICES_PORT,
   cors: true
 },
 ) // Enable CORS if needed
