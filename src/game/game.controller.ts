@@ -35,7 +35,8 @@ export class GameController {
     @Delete('/reset')
     @ApiOperation({ summary: 'Choose a game' })
     async resetGame(@Req() req: any,) {
-        await this.redisService.saveData(GAME_STATES.ROOMS, [])
+        await this.redisService.deleteData(GAME_STATES.GAME)
+        await this.redisService.saveData(GAME_STATES.GAME, null)
         await this.gameServices.resetGame();
         return {
             status: API_STATUSES.SUCCESS
@@ -50,20 +51,17 @@ export class GameController {
         let roomId = getRandomNumber(1e6, 1e7);
 
         let questions = await this.questionService.getQuestionsByGameID(game.id);
-        let rooms = await this.redisService.getData(GAME_STATES.ROOMS);
         let newGame = <GameType>{
             room_id: roomId,
             questions: questions,
             current_index: -1,
-            answer: [],
-            players: []
+            answers: [],
+            players: [],
+            question_end_time: null,
+            question_start_time: null
         };
-        if (rooms) {
-            rooms.push(newGame);
-        } else {
-            rooms = [newGame];
-        }
-        await this.redisService.saveData(GAME_STATES.ROOMS, rooms)
+
+        await this.redisService.saveData(GAME_STATES.GAME, newGame)
         return {
             status: API_STATUSES.SUCCESS,
             room: roomId

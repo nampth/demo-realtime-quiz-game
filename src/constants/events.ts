@@ -3,5 +3,6 @@ export const SOCKET_EVENTS = {
     NEXT_QUESTION: 'next_question',
     ANSWER_QUESTION: 'answer_question',
     SHOW_RESULT: 'show_result',
-    UPDATE_SCORE: 'update_score'
+    UPDATE_SCORE: 'update_score',
+    END_GAME: 'end_game'
 }

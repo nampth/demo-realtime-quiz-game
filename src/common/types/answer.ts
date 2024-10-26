@@ -1,5 +1,6 @@
  
 export type AnswerType = { 
     answer: number
-    email: string
+    email: string,
+    id: string
 }

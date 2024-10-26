@@ -7,6 +7,8 @@ export type GameType = {
     room_id: number,
     questions: Question[],
     current_index: -1,
-    answer: AnswerType[],
-    players: PlayerType[]
+    answers: AnswerType[],
+    players: PlayerType[],
+    question_start_time: String,
+    question_end_time: String,
 }

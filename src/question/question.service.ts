@@ -27,6 +27,9 @@ export class QuestionService {
         return await this.questionRepository.find({
             where: {
                 game_id: id
+            },
+            order: {
+                order: 'ASC'
             }
         });
     }
